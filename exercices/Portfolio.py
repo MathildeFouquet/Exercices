@@ -5,6 +5,7 @@ import gurobipy as gp
 from gurobipy import GRB
 
 with open("../data/portfolio-example.json", "r") as f:
+
     data = json.load(f)
 
 n = data["num_assets"]
@@ -15,14 +16,24 @@ k = data["portfolio_max_size"]
 
 
 with gp.Model("portfolio") as model:
-    # Variable de décision
-    x = model.addVars(n, lb = 0, ub = 1, name = "x")
-    y = model.addVars(n, lb = 0, vtype=GRB.BINARY, name = "y")
+    # Decision variables
+    x = model.addVars(n, vtype=GRB.CONTINUOUS, name="x")
+    y = model.addVars(n, vtype=GRB.BINARY, name="y")
 
-    # Objectif
+    # Objective function
+    model.setObjective(gp.quicksum(sigma[i,j] * x[i] * x[j] for i in range(n) for j in range(n)), sense=GRB.MINIMIZE)
 
-    # Contraintes
+    # Constraints
+    model.addConstr(gp.quicksum(x[i] * mu[i] for i in range (n)) >= mu_0 , name = "return")
+    model.addConstr(gp.quicksum(y[i] for i in range (n)) <= k, name = "number_of_invest_assets")
+    model.addConstr(gp.quicksum(x[i] for i in range (n)) == 1, name = "sum_equals_1")
 
+    for i in range (n):
+        model.addConstr(x[i] <= y[i], name = "coupling")
+
+
+
+    # Optimize the model
     model.optimize()
 
     # Write the solution into a DataFrame
