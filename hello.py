@@ -1,1 +1,0 @@
-print("Hello, this is a trivial Python script!")
