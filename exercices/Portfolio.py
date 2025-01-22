@@ -4,7 +4,7 @@ import numpy as np
 import gurobipy as gp
 from gurobipy import GRB
 
-with open("data/portfolio-example.json", "r") as f:
+with open("../data/portfolio-example.json", "r") as f:
     data = json.load(f)
 
 n = data["num_assets"]
